@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { SessionsClient } from 'dialogflow';
 import processEvent from '../logicParser';
+import FBMessenger from 'fb-messenger';
 
-const { FACEBOOK_VERIFY_TOKEN } = process.env;
+const { FACEBOOK_VERIFY_TOKEN, FACEBOOK_ACCESS_TOKEN } = process.env;
+
+const messenger = new FBMessenger({ token: FACEBOOK_ACCESS_TOKEN });
 
 const routes = Router();
 
@@ -24,7 +27,7 @@ routes.post('/webhook', async (req, res) => {
     entry.forEach(entry => {
       const event = entry.messaging[0];
       (async () => {
-        processEvent(event);
+        await processEvent(event, messenger);
       })();
       res.status(200).send('EVENT_RECEIVED');
     });
