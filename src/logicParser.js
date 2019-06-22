@@ -111,6 +111,41 @@ const sendTimeSelectBtns = async ({ messenger, senderId }) => {
   });
 };
 
+const sendBudgetBtns = async ({ messenger, senderId }) => {
+  const EVENT_TYPE = 'SELECT_BUDGET';
+  return messenger.sendButtonsMessage({
+    id: senderId,
+    text: 'Budget please?',
+    buttons: [
+      {
+        type: 'postback',
+        title: '$0 - $10',
+        payload: JSON.stringify({
+          type: EVENT_TYPE,
+          value: 'cheap'
+        })
+      },
+      {
+        type: 'postback',
+        title: '$11 - $30',
+        payload: JSON.stringify({
+          type: EVENT_TYPE,
+          value: 'mid'
+        })
+      },
+      {
+        type: 'postback',
+        title: ' > $30',
+        payload: JSON.stringify({
+          type: EVENT_TYPE,
+          value: 'pricy'
+        })
+      }
+    ],
+    notificationType: 'REGULAR'
+  });
+};
+
 const sendLocSelectBtns = async ({ messenger, senderId }) => {
   const EVENT_TYPE = 'SELECT_LOC';
   return messenger.sendQuickRepliesMessage({
@@ -192,6 +227,11 @@ const processEvent = async (event, messenger) => {
 
     if (type === 'SELECT_DATE_TYPE') {
       map.set(senderId, { dateType: value });
+      await sendBudgetBtns({ messenger, senderId });
+      map.set(senderId, { state: 'SELECT_BUDGET' });
+      return;
+    } else if (type === 'SELECT_BUDGET') {
+      map.set(senderId, { budget: value });
       await sendTimeSelectBtns({ messenger, senderId });
       map.set(senderId, { state: 'SELECT_TIME' });
       return;
